@@ -19,7 +19,12 @@ html(lang="en")
                             h2= objeto.title || 'Sin título'
                             p Cultura: #{objeto.culture || 'Desconocida'}
                             p Dinastía: #{objeto.dynasty || 'Desconocida'}
-                            a.ver-mas(href="#",data-object-id=objeto.objectID) Ver imágenes adicionales
+        
+                            if objeto.additionalImages && objeto.additionalImages.length > 0
+                                a.ver-mas(href="#", data-object-id=objeto.objectID) Ver imágenes adicionales
+                            else
+                                a.ver-mas(href="javascript:void(0);" class="disabled") No hay imágenes adicionales
+                    
             else
                 p No se encontraron resultados para tu búsqueda.
 

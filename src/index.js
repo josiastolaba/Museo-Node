@@ -15,7 +15,6 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'views')));
 //SOLICITUD ASINCRONA
-
 app.get("/",async (req,res) => {
     try {
         const response = await axios.get("https://collectionapi.metmuseum.org/public/collection/v1/departments")
@@ -94,34 +93,38 @@ app.get('/search', async (req, res) => {
 
             const objects = await Promise.all(promises);
             const filteredObjects = objects.filter(obj => obj !== null);
-            const objtraducidos = await Promise.all(filteredObjects.map(async obj=>{
-                if(obj && obj.data){
+            const objtraducidos = await Promise.all(filteredObjects.map(async obj => {
+                if (obj && obj.data) {
                     const {
                         title = "",
                         dynasty = "",
                         culture = "",
                         objectDate = "",
-                    } = obj.data
+                        additionalImages = []
+                    } = obj.data;
+            
                     try {
-                        const titletrad = title ? await traductor(title,"en","es") : title
-                        const dynastrad = dynasty ? await traductor(dynasty,"en","es") : dynasty
-                        const cultutrad = culture ? await traductor(culture,"en","es") : culture
-                        const objdate = objectDate ? await traductor(objectDate,"en","es") : objectDate
+                        const titletrad = title ? await traductor(title, "en", "es") : title;
+                        const dynastrad = dynasty ? await traductor(dynasty, "en", "es") : dynasty;
+                        const cultutrad = culture ? await traductor(culture, "en", "es") : culture;
+                        const objdate = objectDate ? await traductor(objectDate, "en", "es") : objectDate;
+            
                         return {
                             ...obj.data,
-                            title : titletrad,
-                            dynasty : dynastrad,
-                            culture : cultutrad,
-                            objectDate : objdate,
-                        }
+                            title: titletrad,
+                            dynasty: dynastrad,
+                            culture: cultutrad,
+                            objectDate: objdate,
+                            additionalImages
+                        };
                     } catch (error) {
-                        console.error("Error al traducir")
-                        return obj.data
+                        console.error("Error al traducir");
+                        return obj.data;
                     }
                 }
-                return null
+                return null;
             }));
-
+            
             validObjects.push(...objtraducidos.filter(obj => obj !== null).slice(0, limit - validObjects.length));
 
             currentIndex += batchIDs.length;
@@ -152,9 +155,9 @@ app.get('/object/:id/additional-images', async (req, res) => {
         const object = response.data;
 
         if (object.additionalImages && object.additionalImages.length > 0) {
-            res.json(object.additionalImages); // Envía las imágenes adicionales al frontend
+            res.json(object.additionalImages);
         } else {
-            res.json([]); // Si no hay imágenes adicionales, envía un array vacío
+            res.json([]);
         }
     } catch (error) {
         console.log("Error al recuperar objetos", error);
